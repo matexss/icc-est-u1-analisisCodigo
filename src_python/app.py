@@ -1,28 +1,70 @@
-import benchmarking as Ben
-import metodos_ordenamiento as MetO
+from benchmarking import Benchmarking
+from metodos_ordenamiento import MetodosOrdenamiento
+import matplotlib.pyplot as plt
 
-# Ejecutar benchmark
 if __name__ == "__main__":
+
     print("Funciona")
 
-    benchmark = Ben.Benchmarking()
-    metodos_ordenamiento = MetO.MetodosOrdenamiento()
+    # Prueba básica de copia de listas
+    a = [2, 4, 6]
+    b = a.copy()
+    print("a original:", a)
+    print("b copia   :", b)
+    b = b * 2
+    print("a después :", a)
+    print("b * 2     :", b)
 
-    tam = 10000
-    arreglo_base = benchmark.build_arreglo(tam)
+    # Instanciar clases
+    metodos = MetodosOrdenamiento()
+    benchmarking = Benchmarking()
 
-    # Diccionario llamado metodos con 2 claves: burbuja y seleccion
-    metodos = {
-        "burbuja": metodos_ordenamiento.sortByBubble,
-        "seleccion": metodos_ordenamiento.sortBySelection
+    # Tamaños de entrada a probar
+    tamanios = [500, 1000, 2000]
+    resultados = []
+
+    # Diccionario con los métodos de ordenamiento
+    metodosD = {
+        "burbuja": metodos.sortByBubble,
+        "seleccion": metodos.sortBySelection
     }
 
-    resultados = []
-    for nombre, metodo in metodos.items():
-        tiempo = benchmark.medir_tiempo(metodo, arreglo_base)
-        tuplaresultados=(tam,nombre,tiempo)
-        resultados.append(tuplaresultados)
-    
+    # Ejecutar cada método con cada tamaño
+    for tam in tamanios:
+        arreglo_base = benchmarking.build_arreglo(tam)
+
+        for nombre, metodo in metodosD.items():
+            tiempo = benchmarking.medir_tiempo(metodo, arreglo_base)
+            tuplaResultado = (tam, nombre, tiempo)
+            resultados.append(tuplaResultado)
+
+    # Mostrar resultados en consola
     for resultado in resultados:
         tam, nombre, tiempo = resultado
-        print(f"Tiempo de {nombre} para {tam} elementos: {tiempo:.6f} segundos")
+        print(f"tamaño: {tam}, método:  {nombre}, tiempo: {tiempo:.6f} segundos")
+
+    # Clasificar los tiempos según el método
+    tiempos_by_metodo = {
+        "burbuja": [],
+        "seleccion": [],
+    }
+
+    # Clasificar los métodos según su nombre
+    for tam, nombre, tiempo in resultados:
+        tiempos_by_metodo[nombre].append(tiempo)
+
+    # Crear una gráfica
+    plt.figure(figsize=(10, 6))
+
+    # Graficar una línea de tiempo para cada método
+    # x = tamaño del arreglo, y = tiempo obtenido
+    for nombre, tiempos in tiempos_by_metodo.items():
+        plt.plot(tamanios, tiempos, label=nombre, marker='o')
+
+    # Agregar parámetros visuales
+    plt.title("Comparación de tiempos de ordenamiento")
+    plt.xlabel("Tamaño del arreglo")
+    plt.ylabel("Tiempo (segundos)")
+    plt.grid(True)
+    plt.legend()  # Muestra qué color representa cada método
+    plt.show()
